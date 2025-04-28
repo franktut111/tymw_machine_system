@@ -1,0 +1,35 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+  <h1 class="mb-4">修改設備資料</h1>
+
+  <% if (success_msg.length > 0) { %>
+    <div class="alert alert-success"><%= success_msg %></div>
+  <% } %>
+  
+  <% if (error_msg.length > 0) { %>
+    <div class="alert alert-danger"><%= error_msg %></div>
+  <% } %>
+
+  <form action="/dashboard/edit/<%= machine.m_id %>" method="POST">
+    <div class="mb-3">
+      <label for="m_id" class="form-label">設備編號</label>
+      <input type="text" class="form-control" id="m_id" value="<%= machine.m_id %>" readonly>
+    </div>
+
+    <div class="mb-3">
+      <label for="m_name" class="form-label">設備名稱</label>
+      <input type="text" class="form-control" id="m_name" name="m_name" value="<%= machine.m_name %>" readonly>
+    </div>
+
+    <div class="mb-3">
+      <label for="m_desc" class="form-label">設備描述</label>
+      <textarea class="form-control" id="m_desc" name="m_desc" rows="4" required><%= machine.m_desc %></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">更新設備</button>
+    <a href="/dashboard/list" class="btn btn-secondary">取消</a>
+  </form>
+</div>
+
+<%- include('partials/footer') %>

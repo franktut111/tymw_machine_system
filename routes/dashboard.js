@@ -77,12 +77,16 @@ router.post('/reports/add', ensureAuthenticated, async (req, res) => {
 // 設備保養紀錄
 // 顯示設備保養紀錄
 // 在 routes/dashboard.js 中的 /maintenance 路由中更新查詢
+// 顯示設備保養紀錄（只顯示有 log_type 的）
 router.get('/maintenance', ensureAuthenticated, async (req, res) => {
   try {
-    // 查詢 mach_tlb_view 資料
-    const [rows] = await pool.execute('SELECT * FROM mach_tlb_view ORDER BY log_time DESC');
+    // 查詢 mach_tlb_view 資料，只抓 log_type 有東西的
+    const [rows] = await pool.execute(`
+      SELECT * FROM mach_tlb_view 
+      WHERE log_type IS NOT NULL 
+      ORDER BY log_time DESC
+    `);
     
-    // 將查詢結果傳遞給 EJS 視圖
     res.render('machine_reports', { reports: rows });
   } catch (err) {
     console.error('查詢 mach_tlb_view 失敗:', err);
@@ -90,6 +94,7 @@ router.get('/maintenance', ensureAuthenticated, async (req, res) => {
     res.redirect('/dashboard');
   }
 });
+
 
 
 

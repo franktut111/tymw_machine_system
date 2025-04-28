@@ -22,7 +22,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'defaultSecret',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 6000*60 } // 設定 session 時效
+  cookie: { maxAge: 6000*60*15 } // 設定 session 時效
 }));
 
 
@@ -37,8 +37,13 @@ app.use((req, res, next) => {
 
 // ping 用於刷新 session（避免閒置過期）
 app.get('/ping', (req, res) => {
+  if (req.session) {
+    req.session._garbage = Date();
+    req.session.touch();
+  }
   res.sendStatus(200);
 });
+
 
 // 確保 user 資料在每個請求中都可用
 app.use((req, res, next) => {

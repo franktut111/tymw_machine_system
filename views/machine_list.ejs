@@ -9,7 +9,8 @@
           <th>設備名稱</th>
           <th>設備狀態</th>
           <th>設備描述</th>
-          <th>操作</th> <!-- 新增操作欄 -->
+          <th>設備位置</th>
+          <th>操作</th>
         </tr>
       </thead>
       <tbody>
@@ -19,13 +20,14 @@
             <td><%= machine.m_name %></td>
             <td><%= machine.m_status %></td>
             <td><%= machine.m_desc %></td>
+            <td><%= machine.m_pos || '未設定' %></td> <!-- 顯示設備位置，若無則顯示 '未設定' -->
             <td>
               <a href="/dashboard/edit/<%= machine.m_id %>" class="btn btn-sm btn-warning">修改設備</a>
             </td>
           </tr>
         <% }) %>
       </tbody>
-    </table>
+    </table>    
   </div>
 <% } else { %>
   <div class="alert alert-info">目前沒有任何設備資料。</div>

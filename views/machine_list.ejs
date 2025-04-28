@@ -1,4 +1,5 @@
 <h2 class="mb-4">📋 設備總覽表</h2>
+
 <% if (machines.length > 0) { %>
   <div class="table-responsive">
     <table class="table table-striped table-bordered align-middle">
@@ -8,6 +9,7 @@
           <th>設備名稱</th>
           <th>設備狀態</th>
           <th>設備描述</th>
+          <th>操作</th> <!-- 新增操作欄 -->
         </tr>
       </thead>
       <tbody>
@@ -17,6 +19,9 @@
             <td><%= machine.m_name %></td>
             <td><%= machine.m_status %></td>
             <td><%= machine.m_desc %></td>
+            <td>
+              <a href="/dashboard/edit/<%= machine.m_id %>" class="btn btn-sm btn-warning">修改設備</a>
+            </td>
           </tr>
         <% }) %>
       </tbody>

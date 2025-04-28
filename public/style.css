@@ -1,0 +1,42 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 20px;
+  background-color: #eee;
+  padding: 10px;
+}
+
+nav a {
+  text-decoration: none;
+}
+
+table {
+  margin-top: 10px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table th, table td {
+  border: 1px solid #aaa;
+  padding: 8px;
+}
+  a {
+    text-decoration: none;
+    color: #007bff;
+  }
+  form button {
+    background-color: transparent;
+    border: none;
+    color: red;
+    cursor: pointer;
+  }
+  form button:hover {
+    text-decoration: underline;
+  }
+

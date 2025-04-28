@@ -1,0 +1,94 @@
+<div class="container">
+  <h1>➕ 新增保養/維修紀錄</h1>
+  <form action="/dashboard/reports/add" method="POST" class="form">
+    <label for="m_id">設備編號</label>
+    <input type="text" id="m_id" name="m_id" required>
+    <span id="m_id_check" style="color:red;"></span>
+
+    <label for="log_type">保養類型</label>
+    <select name="log_type" required>
+      <option value="日保養">日保養</option>
+      <option value="周保養">周保養</option>
+      <option value="季保養">季保養</option>
+      <option value="年保">年保</option>
+      <option value="故障維修">故障維修</option>
+    </select>
+
+    <label for="log_desc">保養/維修內容</label>
+    <textarea name="log_desc" rows="4" required></textarea>
+
+    <button type="submit" class="btn">提交紀錄</button>
+  </form>
+</div>
+
+<script>
+  const mIdInput = document.getElementById('m_id');
+  const checkMsg = document.getElementById('m_id_check');
+  let timer;
+
+  mIdInput.addEventListener('input', () => {
+    clearTimeout(timer);
+    const mId = mIdInput.value.trim();
+
+    if (mId === '') {
+      checkMsg.textContent = '';
+      return;
+    }
+
+    checkMsg.style.color = '#555';
+    checkMsg.textContent = '🔍 檢查中...';
+
+    timer = setTimeout(async () => {
+      try {
+        const response = await fetch(`/dashboard/check-mid/${encodeURIComponent(mId)}`);
+        const data = await response.json();
+
+        if (data.exists) {
+          checkMsg.style.color = 'green';
+          checkMsg.textContent = '✔️ 設備存在';
+        } else {
+          checkMsg.style.color = 'red';
+          checkMsg.textContent = '❌ 找不到該設備';
+        }
+      } catch (error) {
+        console.error('設備檢查失敗:', error);
+        checkMsg.style.color = 'orange';
+        checkMsg.textContent = '⚠️ 無法檢查設備';
+      }
+    }, 500); // debounce 500ms
+  });
+
+  document.querySelector('form').addEventListener('submit', function (e) {
+    const submitButton = this.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = '送出中...'; // 可選
+  });
+</script>
+
+<style>
+  .container {
+    max-width: 600px;
+    margin: auto;
+    padding: 2rem;
+  }
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  label {
+    font-weight: bold;
+  }
+  input, select, textarea {
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+  .btn {
+    padding: 0.5rem 1rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+</style>

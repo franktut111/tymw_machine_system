@@ -1,0 +1,37 @@
+<h2 class="mb-4 text-center">🛠️ 設備狀態更新</h2>
+
+<% if (machines.length === 0) { %>
+  <p class="text-center text-danger">目前沒有可選擇的設備，請先新增設備。</p>
+<% } else { %>
+  <form action="/dashboard/status" method="POST" class="mx-auto" style="max-width: 500px;" id="statusForm">
+    <div class="mb-3">
+      <label for="m_id" class="form-label">選擇設備</label>
+      <select class="form-select" id="m_id" name="m_id" required>
+        <% machines.forEach(machine => { %>
+          <option value="<%= machine.m_id %>"><%= machine.m_id %> - <%= machine.m_name %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="m_status" class="form-label">狀態</label>
+      <select class="form-select" id="m_status" name="m_status" required>
+        <option value="正常" selected>正常</option>
+        <option value="故障待修">故障待修</option>
+        <option value="停用">停用</option>
+        <option value="報廢">報廢</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100" id="submitBtn">更新狀態</button>
+  </form>
+<% } %>
+
+<script>
+  // 防止重複提交
+  document.getElementById('statusForm')?.addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '送出中...';
+  });
+</script>

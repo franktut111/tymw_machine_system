@@ -1,0 +1,79 @@
+<% if (success_msg && success_msg.length > 0) { %>
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <%= success_msg %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
+<% if (error_msg && error_msg.length > 0) { %>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <%= error_msg %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
+
+<h2 class="mb-4">新增設備</h2>
+
+<form action="/dashboard/add" method="POST" id="addMachineForm">
+  <div class="mb-3">
+    <label for="m_id" class="form-label">設備編號</label>
+    <input type="text" class="form-control" id="m_id" name="m_id" required>
+    <div id="m_id_check" class="form-text text-danger"></div>
+  </div>
+
+  <div class="mb-3">
+    <label for="m_name" class="form-label">設備名稱</label>
+    <input type="text" class="form-control" id="m_name" name="m_name" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="m_desc" class="form-label">設備描述</label>
+    <textarea class="form-control" id="m_desc" name="m_desc" rows="3"></textarea>
+  </div>
+
+  <div class="mb-3">
+    <label for="m_status" class="form-label">設備狀態</label>
+    <select class="form-select" id="m_status" name="m_status" required>
+      <option value="正常" selected>正常</option>
+      <option value="故障待修">故障待修</option>
+      <option value="停用">停用</option>
+      <option value="報廢">報廢</option>
+    </select>
+  </div>
+
+  <button type="submit" class="btn btn-primary">新增</button>
+</form>
+
+<script>
+  const mIdInput = document.getElementById('m_id');
+  const msgBox = document.getElementById('m_id_check');
+  const form = document.getElementById('addMachineForm');
+
+  mIdInput.addEventListener('input', function () {
+    const m_id = this.value.trim();
+    if (!m_id) {
+      msgBox.textContent = '';
+      return;
+    }
+
+    fetch(`/dashboard/check-mid/${m_id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.exists) {
+          msgBox.textContent = '此設備編號已存在';
+        } else {
+          msgBox.textContent = '';
+        }
+      })
+      .catch(err => {
+        console.error('檢查設備編號錯誤:', err);
+        msgBox.textContent = '檢查失敗，請稍後再試';
+      });
+  });
+
+  form.addEventListener('submit', function (e) {
+    if (msgBox.textContent.includes('已存在')) {
+      e.preventDefault();
+      alert('設備編號重複，請重新輸入');
+    }
+  });
+</script>

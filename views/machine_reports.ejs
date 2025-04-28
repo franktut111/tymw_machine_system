@@ -1,0 +1,66 @@
+<div class="container">
+  <h1>設備保養紀錄</h1>
+  <% if (reports.length > 0) { %>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>設備編號</th>
+          <th>設備名稱</th>
+          <th>紀錄者</th>
+          <th>保養形式</th>
+          <th>維修時間</th>
+          <th>維修紀錄</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% reports.forEach(report => { %>
+          <tr>
+            <td><%= report.m_id %></td>
+            <td><%= report.m_name %></td>
+            <td><%= report.log_sign %></td>
+            <td><%= report.log_type %></td>
+            <td><%= new Date(report.log_time).toLocaleString() %></td>
+            <td><%= report.log_desc %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <p>目前沒有保養紀錄。</p>
+  <% } %>
+</div>
+
+<style>
+  .container {
+    padding: 2rem;
+  }
+
+  table {
+    width: 100%;
+    margin-top: 2rem;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    padding: 0.75rem;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+
+  th {
+    background-color: #f8f9fa;
+  }
+
+  td {
+    white-space: nowrap;
+  }
+
+  .table {
+    margin-top: 1.5rem;
+    width: 100%;
+  }
+
+  .table th, .table td {
+    text-align: center;
+  }
+</style>

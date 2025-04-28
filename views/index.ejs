@@ -1,0 +1,48 @@
+<div class="container">
+  <h1>👋 歡迎回來，<%= user ? user.cn :user%>！</h1>
+  <p>這是設備管理系統的首頁，你可以從下方快速進入各項功能：</p>
+  <div class="buttons">
+    <a href="/dashboard/list" class="btn">📋 設備總覽表</a>
+    <a href="/dashboard/reports/add" class="btn">✍️ 新增保養紀錄</a>
+    <a href="/dashboard/maintenance" class="btn">🛠️ 設備保養紀錄</a>
+    <a href="/dashboard/status" class="btn">📡 設備狀態回報</a>
+    <a href="/dashboard/add" class="btn">➕ 新增設備</a>
+    <a href="/logout" class="btn danger">🚪 登出</a>
+  </div>
+</div>
+
+<style>
+  .container {
+    text-align: center;
+    padding: 3rem;
+  }
+
+  .buttons {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+  }
+
+  .btn:hover {
+    background-color: #0056b3;
+  }
+
+  .btn.danger {
+    background-color: #dc3545;
+  }
+
+  .btn.danger:hover {
+    background-color: #a71d2a;
+  }
+</style>

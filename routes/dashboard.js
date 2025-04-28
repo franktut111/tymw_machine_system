@@ -14,9 +14,10 @@ router.get('/', (req, res) => {
 });
 //顯示設備清單
 // 顯示設備清單（從 mach_list_view 讀取）
+// 顯示設備清單（從 mach_list_view 讀取）
 router.get('/list', async (req, res) => {
   try {
-    const [rows] = await pool.execute('SELECT m_id, m_name, m_status, m_desc FROM mach_list_view ORDER BY m_id');
+    const [rows] = await pool.execute('SELECT m_id, m_name, m_status, m_desc, m_pos FROM mach_list_view ORDER BY m_id');
     res.render('machine_list', { machines: rows });
   } catch (err) {
     console.error('查詢 mach_list_view 失敗:', err);
@@ -24,6 +25,7 @@ router.get('/list', async (req, res) => {
     res.redirect('/dashboard');
   }
 });
+
 
 
 
@@ -74,20 +76,18 @@ router.post('/reports/add', ensureAuthenticated, async (req, res) => {
 
 
 
-// 設備保養紀錄
-// 顯示設備保養紀錄
 // 在 routes/dashboard.js 中的 /maintenance 路由中更新查詢
-// 顯示設備保養紀錄（只顯示有 log_type 的）
+// 顯示設備保養紀錄
 router.get('/maintenance', ensureAuthenticated, async (req, res) => {
   try {
-    // 查詢 mach_tlb_view 資料，只抓 log_type 有東西的
-    const [rows] = await pool.execute(`
-      SELECT * FROM mach_tlb_view 
-      WHERE log_type IS NOT NULL 
-      ORDER BY log_time DESC
-    `);
-    
-    res.render('machine_reports', { reports: rows });
+    // 查詢 mach_tlb_view 資料
+    const [rows] = await pool.execute('SELECT * FROM mach_tlb_view ORDER BY log_time DESC');
+
+    // 過濾掉 log_type 為 NULL 的資料
+    const filteredReports = rows.filter(report => report.log_type !== null);
+
+    // 將過濾後的結果傳遞給 EJS 視圖
+    res.render('machine_reports', { reports: filteredReports });
   } catch (err) {
     console.error('查詢 mach_tlb_view 失敗:', err);
     req.flash('error_msg', '無法載入設備保養紀錄');
@@ -115,13 +115,13 @@ router.get('/status', ensureAuthenticated, async (req, res) => {
 
 // 提交設備狀態更新
 router.post('/status', ensureAuthenticated, async (req, res) => {
-  const { m_id, m_status } = req.body;
+  const { m_id, m_status, m_pos } = req.body;
   const log_sign = req.session.user.cn;
 
   try {
     await pool.execute(
-      'INSERT INTO mach_tlb (m_id, m_status, log_sign, log_time) VALUES (?, ?, ?, NOW())',
-      [m_id, m_status, log_sign]
+      'INSERT INTO mach_tlb (m_id, m_status, log_sign, log_time, m_pos) VALUES (?, ?, ?, NOW(), ?)',
+      [m_id, m_status, log_sign, m_pos]
     );
     req.flash('success_msg', '設備狀態更新成功！');
     res.redirect('/dashboard/status');
@@ -162,8 +162,9 @@ router.get('/check-mid/:m_id', ensureAuthenticated, async (req, res) => {
   }
 });
 
+// 新增設備
 router.post('/add', ensureAuthenticated, async (req, res) => {
-  const { m_id, m_name, m_desc, m_status } = req.body;
+  const { m_id, m_name, m_desc, m_status, m_pos } = req.body;
   const log_sign = req.session.user.cn;
 
   try {
@@ -183,12 +184,11 @@ router.post('/add', ensureAuthenticated, async (req, res) => {
 
     // 僅將狀態寫入 mach_tlb，不再寫入 log_type
     await pool.execute(
-      `INSERT INTO mach_tlb (m_id, m_status, log_sign, log_desc, log_time)
-       VALUES (?, ?, ?, ?, NOW())`,
-      [m_id, m_status, log_sign, '']
+      `INSERT INTO mach_tlb (m_id, m_status, log_sign, m_pos, log_desc, log_time)
+       VALUES (?, ?, ?, ?, ?, NOW())`,
+      [m_id, m_status, log_sign, m_pos, '']
     );
-    
-    
+
     req.flash('success_msg', '設備新增成功！');
     res.redirect('/dashboard/list');
   } catch (err) {
@@ -198,6 +198,8 @@ router.post('/add', ensureAuthenticated, async (req, res) => {
   }
 });
 
+
+// 顯示修改設備表單
 // 顯示修改設備表單
 router.get('/edit/:m_id', ensureAuthenticated, async (req, res) => {
   const m_id = req.params.m_id;
@@ -223,14 +225,15 @@ router.get('/edit/:m_id', ensureAuthenticated, async (req, res) => {
 });
 
 // 提交修改設備資料
+// 提交修改設備資料
 router.post('/edit/:m_id', ensureAuthenticated, async (req, res) => {
   const m_id = req.params.m_id;
-  const { m_name, m_desc } = req.body;
+  const { m_name, m_desc } = req.body;  // 已移除 m_pos
 
   try {
     const [result] = await pool.execute(
       'UPDATE mach_list SET m_name = ?, m_desc = ? WHERE m_id = ?',
-      [m_name, m_desc, m_id]
+      [m_name, m_desc, m_id]  // 僅更新 m_name 和 m_desc
     );
 
     if (result.affectedRows === 0) {
@@ -246,6 +249,7 @@ router.post('/edit/:m_id', ensureAuthenticated, async (req, res) => {
     res.redirect('/dashboard/list');
   }
 });
+
 
 
 

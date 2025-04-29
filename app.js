@@ -22,7 +22,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'defaultSecret',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 6000*60*15 } // 設定 session 時效
+  cookie: { maxAge: 6000*60*60 } // 設定 session 時效
 }));
 
 
@@ -61,6 +61,6 @@ app.use('/', authRoutes);
 app.use('/', ensureAuthenticated, indexRoutes);
 app.use('/dashboard', ensureAuthenticated,machineRoutes );
 
-app.listen(3000, () => {
-  console.log('✅ Server running at http://localhost:3000');
+app.listen(5002, () => {
+  console.log('✅ Server running at frank.tsungyin.tw:5002');
 });

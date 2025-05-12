@@ -10,9 +10,9 @@ const ensureAuthenticated = require('../middleware/auth');
 //async:讓函式變成非同步函式,才可以使用await  await:用來等待一個結果,等它完成後再繼續執行下面的程式碼
 //try是希望成功的邏輯,catch是失敗後該如何處理
 router.get('/', (req, res) => {
-  res.redirect('/dashboard/list');
+  res.redirect('/dashboard/list'); //redirect用於導向url render導向ejs...等view(視圖)
 });
-//顯示設備清單
+
 // 顯示設備清單（從 mach_list_view 讀取）
 // 顯示設備清單（從 mach_list_view 讀取）
 router.get('/list', async (req, res) => {
@@ -29,10 +29,6 @@ router.get('/list', async (req, res) => {
 
 
 
-
-
-
-// 顯示新增紀錄表單
 // 顯示新增紀錄表單
 router.get('/reports/add', ensureAuthenticated, (req, res) => {
   res.render('add_report', {
@@ -43,23 +39,45 @@ router.get('/reports/add', ensureAuthenticated, (req, res) => {
 
 
 // 寫入紀錄資料
+
 router.post('/reports/add', ensureAuthenticated, async (req, res) => {
-  const { m_id, log_type, log_desc } = req.body;
+  const logFlagMap = {
+    1: '加潤滑油',
+    2: '機械清潔',
+    4: '指示燈',
+    8: '電路正常',
+    16: '油壓正常',
+    32: '噪音正常',
+    64: '床抬間隙',
+    128: '螺桿間隙',
+    256: '軸承間隙'
+  };
+  const { m_id, log_type, log_desc, log_flags } = req.body;
   const log_sign = req.session.user.cn;
-
+  
   try {
-    // 先確認設備是否存在
+    // 確認設備是否存在
     const [checkResult] = await pool.execute('SELECT * FROM mach_list WHERE m_id = ?', [m_id]);
-
     if (checkResult.length === 0) {
       req.flash('error_msg', `找不到設備編號：${m_id}`);
       return res.redirect('/dashboard/reports/add');
     }
 
-    // 設備存在才繼續新增紀錄
+    // 處理 log_flags，轉換為文字描述
+    let selectedFlags = [];
+    if (Array.isArray(log_flags)) {
+      selectedFlags = log_flags.map(flag => logFlagMap[parseInt(flag)]).filter(Boolean);
+    }
+
+    // 合併勾選項目的描述與其他描述
+    const combinedDesc = selectedFlags.length > 0
+      ? `檢查項目：${selectedFlags.join('、')}\n${log_desc}`
+      : log_desc;
+
+    // 插入資料到資料庫
     await pool.execute(
       'INSERT INTO mach_tlb (m_id, log_sign, log_type, log_desc, log_time) VALUES (?, ?, ?, ?, NOW())',
-      [m_id, log_sign, log_type, log_desc]
+      [m_id, log_sign, log_type, combinedDesc]
     );
 
     req.flash('success_msg', '紀錄新增成功！');
@@ -70,8 +88,6 @@ router.post('/reports/add', ensureAuthenticated, async (req, res) => {
     res.redirect('/dashboard/reports/add');
   }
 });
-
-
 
 
 
@@ -94,9 +110,6 @@ router.get('/maintenance', ensureAuthenticated, async (req, res) => {
     res.redirect('/dashboard');
   }
 });
-
-
-
 
 
 
@@ -131,9 +144,6 @@ router.post('/status', ensureAuthenticated, async (req, res) => {
     res.redirect('/dashboard/status');
   }
 });
-
-
-
 
 
 

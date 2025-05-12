@@ -13,10 +13,32 @@
       <option value="年保">年保</option>
       <option value="故障維修">故障維修</option>
     </select>
+    
+    <label>檢查項目：</label>
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+      <tr>
+        <th>項目</th>
+        <th>勾選</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>加潤滑油</td><td><input type="checkbox" name="log_flags[]" value="1"></td></tr>
+      <tr><td>機械清潔</td><td><input type="checkbox" name="log_flags[]" value="2"></td></tr>
+      <tr><td>指示燈</td><td><input type="checkbox" name="log_flags[]" value="4"></td></tr>
+      <tr><td>電路正常</td><td><input type="checkbox" name="log_flags[]" value="8"></td></tr>
+      <tr><td>油壓正常</td><td><input type="checkbox" name="log_flags[]" value="16"></td></tr>
+      <tr><td>噪音正常</td><td><input type="checkbox" name="log_flags[]" value="32"></td></tr>
+      <tr><td>床抬間隙</td><td><input type="checkbox" name="log_flags[]" value="64"></td></tr>
+      <tr><td>螺桿間隙</td><td><input type="checkbox" name="log_flags[]" value="128"></td></tr>
+      <tr><td>軸承間隙</td><td><input type="checkbox" name="log_flags[]" value="256"></td></tr>
+    </tbody>
+  </table>
 
+    
+    
     <label for="log_desc">保養/維修內容</label>
     <textarea name="log_desc" rows="4" required></textarea>
-
     <button type="submit" class="btn">提交紀錄</button>
   </form>
 </div>
@@ -63,9 +85,37 @@
     submitButton.disabled = true;
     submitButton.textContent = '送出中...'; // 可選
   });
+  //checkbox color
+  document.addEventListener('DOMContentLoaded', () => {
+  const checkboxes = document.querySelectorAll('input[name="log_flags[]"]');
+  checkboxes.forEach(checkbox => {
+    const td = checkbox.closest('td');
+    const label = td.previousElementSibling;
+    const updateColor = () => {
+      if (checkbox.checked) {
+        label.classList.add('checked');
+        label.classList.remove('unchecked');
+      } else {
+        label.classList.add('unchecked');
+        label.classList.remove('checked');
+      }
+    };
+    checkbox.addEventListener('change', updateColor);
+    updateColor(); // 初始化時設定顏色
+  });
+});
+
 </script>
 
 <style>
+    .checked {
+    color: green;
+  }
+
+  .unchecked {
+    color: red;
+  }
+
   .container {
     max-width: 600px;
     margin: auto;

@@ -7,6 +7,7 @@
         <tr>
           <th>設備編號</th>
           <th>設備名稱</th>
+          <th>管理單位</th>
           <th>設備狀態</th>
           <th>設備描述</th>
           <th>設備位置</th>
@@ -18,6 +19,7 @@
           <tr>
             <td><%= machine.m_id %></td>
             <td><%= machine.m_name %></td>
+            <td><%= machine.dep_name %></td>
             <td><%= machine.m_status %></td>
             <td><%= machine.m_desc %></td>
             <td><%= machine.m_pos || '未設定' %></td> <!-- 顯示設備位置，若無則顯示 '未設定' -->

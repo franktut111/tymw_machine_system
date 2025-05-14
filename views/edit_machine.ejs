@@ -21,6 +21,16 @@
     </div>
 
     <div class="mb-3">
+    <label for="m_dep" class="form-label">管理單位</label>
+    <select class="form-select" id="m_dep" name="m_dep" required>
+      <option value="" disabled selected>請選擇部門</option>
+      <% departments.forEach(dep => { %>
+        <option value="<%= dep.dep_id %>"><%= dep.dep_name %></option>
+      <% }) %>
+    </select>
+  </div>
+
+    <div class="mb-3">
       <label for="m_desc" class="form-label">設備描述</label>
       <textarea class="form-control" id="m_desc" name="m_desc" rows="4" required><%= machine.m_desc %></textarea>
     </div>

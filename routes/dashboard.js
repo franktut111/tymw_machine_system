@@ -54,12 +54,20 @@ router.post('/reports/add', ensureAuthenticated, async (req, res) => {
       return res.redirect('/dashboard/reports/add');
     }
 
-    let selectedFlags = Array.isArray(log_flags)
-      ? log_flags.map(flag => logFlagMap[parseInt(flag)]).filter(Boolean)
+    // 將勾選與狀態組成一行文字：加潤滑油（正常）/（不正常）
+    let selectedFlagsWithStatus = Array.isArray(log_flags)
+      ? log_flags.map(flag => {
+          const value = parseInt(flag);
+          const name = logFlagMap[value];
+          const status = req.body[`flag_status_${value}`]; // 取得 radio 值
+          if (!name) return null;
+          const statusText = status ? `（${status}）` : '';
+          return `${name}${statusText}`;
+        }).filter(Boolean)
       : [];
 
-    const combinedDesc = selectedFlags.length > 0
-      ? `檢查項目：${selectedFlags.join('、')}\n${log_desc}`
+    const combinedDesc = selectedFlagsWithStatus.length > 0
+      ? `檢查項目：${selectedFlagsWithStatus.join('、')}\n${log_desc}`
       : log_desc;
 
     await pool.execute(
@@ -75,6 +83,7 @@ router.post('/reports/add', ensureAuthenticated, async (req, res) => {
     res.redirect('/dashboard/reports/add');
   }
 });
+
 
 // ────────────── 顯示保養紀錄 ──────────────
 router.get('/maintenance', ensureAuthenticated, async (req, res) => {

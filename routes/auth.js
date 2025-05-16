@@ -18,16 +18,22 @@ router.post('/login', async (req, res) => {
     userSearchBase: 'ou=People,dc=tsungyin,dc=tw',
     usernameAttribute: 'cn',
     username: username,
-    
     userPassword: password,
+    //查詢群組
+    groupSearchBase: 'ou=Group,dc=tsungyin,dc=tw',
+    groupClass:'groupOfNames',
+    groupMemberAttribute: 'member',
   };
   
 
   try {
     const user = await authenticate(options);
+     req.session.user = {
+      cn: user.cn,
+      dn: user.dn,
+      groups: user.groups || [],
+    };
     req.flash('success_msg', `歡迎 ${user.cn} 登入成功！`);
-    // console.log(password);
-    req.session.user = user;
     res.redirect('/');
   } catch (err) {
     console.error('LDAP 驗證失敗:', err.message);

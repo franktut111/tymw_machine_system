@@ -1,1 +1,4 @@
+#忽略node_modules目錄
 node_modules/
+#忽略.env檔案
+.env

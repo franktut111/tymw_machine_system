@@ -1,6 +1,9 @@
 <div class="container-fluid">
   <h1>設備保養紀錄</h1>
   <% if (reports.length > 0) { %>
+    <div>
+
+    </div>
     <table class="table">
       <thead>
         <tr>
@@ -20,7 +23,7 @@
             <td><%= report.log_sign %></td>
             <td><%= report.log_type %></td>
             <td><%= new Date(report.log_time).toLocaleString() %></td>
-            <td><%= report.log_desc %></td>
+            <td style="text-align: left;"><%= report.log_desc %></td>
           </tr>
         <% }) %>
       </tbody>

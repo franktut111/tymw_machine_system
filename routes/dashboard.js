@@ -39,7 +39,7 @@ router.post('/reports/add', ensureAuthenticated, async (req, res) => {
     8: '電路正常',
     16: '油壓正常',
     32: '噪音正常',
-    64: '床抬間隙',
+    64: '床台間隙',
     128: '螺桿間隙',
     256: '軸承間隙'
   };
@@ -54,28 +54,25 @@ router.post('/reports/add', ensureAuthenticated, async (req, res) => {
       return res.redirect('/dashboard/reports/add');
     }
 
-    // 將勾選與狀態組成一行文字：加潤滑油（正常）/（不正常）
-    let selectedFlagsWithStatus = Array.isArray(log_flags)
-      ? log_flags.map(flag => {
-          const value = parseInt(flag);
-          const name = logFlagMap[value];
-          const status = req.body[`flag_status_${value}`]; // 取得 radio 值
-          if (!name) return null;
-          const statusText = status ? `（${status}）` : '';
-          return `${name}${statusText}`;
-        }).filter(Boolean)
-      : [];
+    let combinedDesc = '';
+    if (Array.isArray(log_flags)) {
+      const statusLines = log_flags.map(flag => {
+        const value = parseInt(flag);
+        const itemName = logFlagMap[value] || `未知項目(${value})`;
+        const status = req.body[`flag_status_${value}`] || '未填';
+        return `${itemName}（${status}）`;
+      });
+      combinedDesc = statusLines.join('\n');
+    }
 
-    const combinedDesc = selectedFlagsWithStatus.length > 0
-      ? `檢查項目：${selectedFlagsWithStatus.join('、')}\n${log_desc}`
-      : log_desc;
+    const fullDesc = [combinedDesc, '|', log_desc].filter(Boolean).join('\n');
 
     await pool.execute(
       'INSERT INTO mach_tlb (m_id, log_sign, log_type, log_desc, log_time) VALUES (?, ?, ?, ?, NOW())',
-      [m_id, log_sign, log_type, combinedDesc]
+      [m_id, log_sign, log_type, fullDesc]
     );
 
-    req.flash('success_msg', '紀錄新增成功！');
+    req.flash('success_msg', '保養紀錄新增成功！');
     res.redirect('/dashboard/maintenance');
   } catch (err) {
     console.error('新增紀錄失敗:', err);

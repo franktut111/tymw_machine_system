@@ -1,9 +1,12 @@
 <div class="container">
   <h1>➕ 新增保養/維修紀錄</h1>
   <form action="/dashboard/reports/add" method="POST" class="form">
+
+    <!-- ✅ 自動帶入設備編號 -->
     <label for="m_id">設備編號</label>
-    <input type="text" id="m_id" name="m_id" required>
+    <input type="text" name="m_id" id="m_id" class="form-control" value="<%= m_id %>" readonly>
     <span id="m_id_check" style="color:red;"></span>
+
     <label for="log_type">保養類型</label>
     <select name="log_type" id="log_type" required>
       <option value="日保養">日保養</option>
@@ -11,33 +14,34 @@
       <option value="季保養">季保養</option>
       <option value="年保">年保</option>
       <option value="故障維修">故障維修</option>
-      <!-- <option value="校正">校正</option> -->
     </select>
 
     <label>檢查項目：</label>
     <table border="1" cellpadding="8" cellspacing="0">
-  <thead>
-    <tr>
-      <th>項目</th>
-      <th>狀態</th>
-    </tr>
-  </thead>
-  <tbody id="check-items-body">
-    <!-- JS 動態插入 -->
-  </tbody>
-</table>
+      <thead>
+        <tr>
+          <th>項目</th>
+          <th>狀態</th>
+        </tr>
+      </thead>
+      <tbody id="check-items-body">
+        <!-- JS 動態插入 -->
+      </tbody>
+    </table>
+
     <label for="log_desc">保養/維修內容</label>
-    <textarea name="log_desc" rows="4"></textarea>
+    <textarea name="log_desc" rows="4" class="form-control"></textarea>
 
     <button type="submit" class="btn">提交紀錄</button>
   </form>
 </div>
 
 <script>
-const mIdInput = document.getElementById('m_id');
-const checkMsg = document.getElementById('m_id_check');
+  const mIdInput = document.getElementById('m_id');
+  const checkMsg = document.getElementById('m_id_check');
   let timer;
 
+  // ✅ 啟用設備編號檢查（readonly 下這段沒用，但保留以供未來開放使用）
   mIdInput.addEventListener('input', () => {
     clearTimeout(timer);
     const mId = mIdInput.value.trim();
@@ -71,6 +75,8 @@ const checkMsg = document.getElementById('m_id_check');
     submitButton.disabled = true;
     submitButton.textContent = '送出中...';
   });
+
+  // ✅ 檢查項目動態生成邏輯
   const checkItemsMap = {
     '日保養': ['加潤滑油', '機械清潔', '指示燈'],
     '周保養': ['加潤滑油', '機械清潔', '電路正常', '指示燈'],
@@ -95,28 +101,24 @@ const checkMsg = document.getElementById('m_id_check');
   const logTypeSelect = document.getElementById('log_type');
 
   function renderCheckItems(type) {
-  const requiredItems = new Set(checkItemsMap[type] || []);
-  checkItemsBody.innerHTML = '';
+    const requiredItems = new Set(checkItemsMap[type] || []);
+    checkItemsBody.innerHTML = '';
 
-  requiredItems.forEach(label => {
-    const value = itemValueMap[label];
+    requiredItems.forEach(label => {
+      const value = itemValueMap[label];
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="label">${label}</td>
+        <td>
+          <input type="hidden" name="log_flags[]" value="${value}">
+          <label><input type="radio" name="flag_status_${value}" value="正常" required> 正常</label>
+          <label><input type="radio" name="flag_status_${value}" value="不正常"> 不正常</label>
+        </td>`;
+      checkItemsBody.appendChild(row);
+    });
 
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td class="label">${label}</td>
-      <td>
-        <!-- 隱藏 log_flags[] input，讓後端知道有這個項目 -->
-        <input type="hidden" name="log_flags[]" value="${value}">
-        <label><input type="radio" name="flag_status_${value}" value="正常" required> 正常</label>
-        <label><input type="radio" name="flag_status_${value}" value="不正常"> 不正常</label>
-      </td>
-    `;
-    checkItemsBody.appendChild(row);
-  });
-
-  updateColorHighlighting();
-}
-
+    updateColorHighlighting();
+  }
 
   function updateColorHighlighting() {
     const rows = checkItemsBody.querySelectorAll('tr');
@@ -144,67 +146,28 @@ const checkMsg = document.getElementById('m_id_check');
   });
 </script>
 
-
 <style>
-  .checkbox-wrapper {
-    position: relative;
-    width: 24px;
-    height: 24px;
-  }
-
-  .checkbox-wrapper input[type="checkbox"] {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 100%;
-    height: 100%;
-    border: 2px solid #999;
-    cursor: pointer;
-    font-size: 20px;
-    text-align: center;
-    position: relative;
-    background-color: white;
-  }
-
-  .checkbox-wrapper input[type="checkbox"]::before {
-    content: "X";
-    position: absolute;
-    top: -2px;
-    left: 3px;
-    color: red;
-    font-size: 18px;
-  }
-
-  .checkbox-wrapper input[type="checkbox"]:checked::before {
-    content: "V";
-    color: green;
-  }
-
   .label {
     transition: color 0.3s;
     font-weight: bold;
   }
-
   .container {
     max-width: 700px;
     margin: auto;
     padding: 2rem;
   }
-
   .form {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
-
   label {
     font-weight: bold;
   }
-
   input, select, textarea {
     padding: 0.5rem;
     font-size: 1rem;
   }
-
   .btn {
     padding: 0.5rem 1rem;
     background-color: #28a745;

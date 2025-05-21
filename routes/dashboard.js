@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const onlyChief = require('../middleware/role');
+const QRCode = require('qrcode');
 
 // Redirect 根目錄到 /dashboard/list
 router.get('/', (req, res) => {
@@ -14,6 +15,11 @@ router.get('/list', async (req, res) => {
     const [rows] = await pool.execute(
       'SELECT m_id, m_name, m_status, m_desc, m_pos,dep_name FROM mach_list_view ORDER BY m_id'
     );
+    // 為每台設備產生 QR Code 圖片（DataURL）
+    for (const machine of rows) {
+      const qrUrl = `http://frank.tsungyin.tw:5002/dashboard/reports/add?m_id=${machine.m_id}`;
+      machine.qrCode = await QRCode.toDataURL(qrUrl);
+    }
     res.render('machine_list', { machines: rows });
   } catch (err) {
     console.error('查詢 mach_list_view 失敗:', err);
@@ -24,7 +30,9 @@ router.get('/list', async (req, res) => {
 
 // ────────────── 顯示新增紀錄表單 ──────────────
 router.get('/reports/add', (req, res) => {
+  const m_id = req.query.m_id || ''; // 從 URL 帶入設備編號
   res.render('add_report', {
+    m_id,
     success_msg: req.flash('success_msg'),
     error_msg: req.flash('error_msg')
   });

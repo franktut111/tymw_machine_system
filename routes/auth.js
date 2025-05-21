@@ -16,14 +16,18 @@ router.post('/login', async (req, res) => {
     adminDn: 'cn=admin,dc=tsungyin,dc=tw',
     adminPassword: process.env.LDAP_ADMIN_PASSWORD,
     userSearchBase: 'ou=People,dc=tsungyin,dc=tw',
-    usernameAttribute: 'uid',
+    usernameAttribute: 'cn',
     username: username,
     userPassword: password,
   };
 
   try {
     // 驗證帳密
-    const user = await authenticate(options);
+    const user = await authenticate(options);//登入成功
+
+    //取得uid
+    const userUid = user.uid;
+    const userCn = user.cn;
 
     // 建立 LDAP client 查詢是否為 chief 群組成員
     const client = ldap.createClient({ url: 'ldap://tek.tsungyin.tw' });
@@ -36,9 +40,9 @@ router.post('/login', async (req, res) => {
     });
 
     const opts = {
-      filter: `(&(objectClass=posixGroup)(gidNumber=20010)(memberUid=${username}))`,
+      filter: `(&(objectClass=posixGroup)(gidNumber=20010)(memberUid=${userUid}))`,
       scope: 'sub',
-      attributes: ['uid'],
+      attributes: ['cn'],
     };
 
     const isChief = await new Promise((resolve, reject) => {
@@ -56,8 +60,8 @@ router.post('/login', async (req, res) => {
 
     // 將資訊寫入 session
     req.session.user = {
-      cn: user.cn,
-      uid: user.uid,
+      cn: userCn,
+      uid: userUid,
       dn: user.dn,
       isChief: isChief,
     };

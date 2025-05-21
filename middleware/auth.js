@@ -5,7 +5,3 @@ module.exports = function ensureAuthenticated(req, res, next) {
   req.flash('error_msg', '請先登入以繼續使用');
   res.redirect('/login');
 };
-
-
-
-

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
-const ensureAuthenticated = require('../middleware/auth');
+const onlyChief = require('../middleware/role');
 
 // Redirect 根目錄到 /dashboard/list
 router.get('/', (req, res) => {
@@ -23,7 +23,7 @@ router.get('/list', async (req, res) => {
 });
 
 // ────────────── 顯示新增紀錄表單 ──────────────
-router.get('/reports/add', ensureAuthenticated, (req, res) => {
+router.get('/reports/add', (req, res) => {
   res.render('add_report', {
     success_msg: req.flash('success_msg'),
     error_msg: req.flash('error_msg')
@@ -31,7 +31,7 @@ router.get('/reports/add', ensureAuthenticated, (req, res) => {
 });
 
 // ────────────── 寫入紀錄資料 ──────────────
-router.post('/reports/add', ensureAuthenticated, async (req, res) => {
+router.post('/reports/add', async (req, res) => {
   const logFlagMap = {
     1: '加潤滑油',
     2: '機械清潔',
@@ -83,7 +83,7 @@ router.post('/reports/add', ensureAuthenticated, async (req, res) => {
 
 
 // ────────────── 顯示保養紀錄 ──────────────
-router.get('/maintenance', ensureAuthenticated, async (req, res) => {
+router.get('/maintenance', async (req, res) => {
   try {
     const [rows] = await pool.execute('SELECT * FROM mach_tlb_view ORDER BY log_time DESC');
     const filteredReports = rows.filter(report => report.log_type !== null);
@@ -96,7 +96,7 @@ router.get('/maintenance', ensureAuthenticated, async (req, res) => {
 });
 
 // ────────────── 顯示狀態更新表單 ──────────────
-router.get('/status', ensureAuthenticated, async (req, res) => {
+router.get('/status',onlyChief, async (req, res) => {
   try {
     const [machines] = await pool.execute('SELECT m_id, m_name FROM mach_list ORDER BY m_id');
     res.render('machine_status', { machines });
@@ -108,7 +108,7 @@ router.get('/status', ensureAuthenticated, async (req, res) => {
 });
 
 // ────────────── 提交狀態更新 ──────────────
-router.post('/status', ensureAuthenticated, async (req, res) => {
+router.post('/status', onlyChief, async (req, res) => {
   const { m_id, m_status, m_pos } = req.body;
   const log_sign = req.session.user.cn;
 
@@ -127,7 +127,7 @@ router.post('/status', ensureAuthenticated, async (req, res) => {
 });
 
 // ────────────── 顯示新增設備表單 ──────────────
-router.get('/add', ensureAuthenticated, async (req, res) => {
+router.get('/add',onlyChief, async (req, res) => {
   try {
     const [departments] = await pool.execute('SELECT dep_id, dep_name FROM department ORDER BY dep_id');
     res.render('add_machine', {
@@ -143,7 +143,7 @@ router.get('/add', ensureAuthenticated, async (req, res) => {
 });
 
 // POST 新增設備
-router.post('/add', ensureAuthenticated, async (req, res) => {
+router.post('/add',onlyChief, async (req, res) => {
   const { m_id, m_name, m_desc, m_status, m_pos, m_dep } = req.body;
   const log_sign = req.session.user.cn;
 
@@ -174,7 +174,7 @@ router.post('/add', ensureAuthenticated, async (req, res) => {
 });
 
 // AJAX: 檢查設備編號是否存在
-router.get('/check-mid/:m_id', ensureAuthenticated, async (req, res) => {
+router.get('/check-mid/:m_id', async (req, res) => {
   const { m_id } = req.params;
   try {
     const [rows] = await pool.execute('SELECT m_id FROM mach_list WHERE m_id = ?', [m_id]);
@@ -187,7 +187,7 @@ router.get('/check-mid/:m_id', ensureAuthenticated, async (req, res) => {
 
 // ────────────── 顯示設備編輯表單 ──────────────
 // routes/dashboard.js
-router.get('/edit/:m_id', ensureAuthenticated, async (req, res) => {
+router.get('/edit/:m_id',onlyChief, async (req, res) => {
   const m_id = req.params.m_id;
   try {
     const [machineRows] = await pool.execute('SELECT * FROM mach_list WHERE m_id = ?', [m_id]);
@@ -214,7 +214,7 @@ router.get('/edit/:m_id', ensureAuthenticated, async (req, res) => {
 
 
 // ────────────── 提交編輯設備 ──────────────
-router.post('/edit/:m_id', ensureAuthenticated, async (req, res) => {
+router.post('/edit/:m_id',onlyChief, async (req, res) => {
   const m_id = req.params.m_id;
   const { m_name, m_desc,m_dep } = req.body;
 

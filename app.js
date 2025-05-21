@@ -22,7 +22,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'defaultSecret',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 6000*60*60 } // 設定 session 時效
+  cookie: {
+    maxAge: 1000 * 60 * 60, // 1 小時
+    sameSite: 'lax',        // important for local testing
+    secure: false           // 若是 HTTP，請設 false；若是 HTTPS，請設 true
+  } // 設定 session 時效
 }));
 
 

@@ -1,0 +1,14 @@
+{
+  "tags": {
+    "allowUnknownTags": true
+  },
+  "source": {
+    "include": ["routes","app.js"],  
+    "includePattern": ".js$"
+  },
+  "opts": {
+    "destination": "./docs/jsdoc", 
+    "recurse": true,
+    "template": "templates/default"
+  }
+}

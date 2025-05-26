@@ -1,66 +1,19 @@
-<div class="container">
-  <h1>👋 歡迎回來，<%= user ? user.cn :user %>！</h1>
-  <p>這是設備管理系統的首頁，你可以從下方快速進入各項功能：</p>
-  <div class="feature-group">
-    <h2>🧰 設備相關功能</h2>
-    <div class="buttons">
-      <a href="/dashboard/list" class="btn">📋 設備總覽表</a>
-      <a href="/dashboard/status" class="btn">📡 設備狀態回報</a>
-      <a href="/dashboard/add" class="btn">➕ 新增設備</a>
-    </div>
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>設備管理系統</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- 主內容區塊 -->
+  <div class="container mt-5 text-center">
+    <h1 class="mb-4">👋 歡迎回來</h1>
+    <p class="lead">這是設備管理系統的首頁，你可以從上方導覽列快速進入各項功能。</p>
   </div>
 
-  <div class="feature-group">
-    <h2>🔧 保養維修紀錄功能</h2>
-    <div class="buttons">
-      <a href="/dashboard/reports/add" class="btn">✍️ 新增保養紀錄</a>
-      <a href="/dashboard/maintenance" class="btn">🛠️ 設備保養紀錄</a>
-    </div>
-  </div>
-
-</div>
-
-<style>
-  .container {
-    text-align: center;
-    padding: 3rem;
-  }
-
-  .feature-group {
-    margin-top: 2rem;
-  }
-
-  .feature-group h2 {
-    margin-bottom: 1rem;
-    color: #333;
-  }
-
-  .buttons {
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
-    align-items: center;
-    margin-bottom: 1.5rem;
-  }
-
-  .btn {
-    padding: 0.75rem 1.5rem;
-    background-color: #007bff;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 1.1rem;
-  }
-
-  .btn:hover {
-    background-color: #0056b3;
-  }
-
-  .btn.danger {
-    background-color: #dc3545;
-  }
-
-  .btn.danger:hover {
-    background-color: #a71d2a;
-  }
-</style>
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

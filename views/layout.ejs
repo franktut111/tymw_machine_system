@@ -12,14 +12,36 @@
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
       <a class="navbar-brand" href="/">設備管理系統</a>
-      <div class="d-flex ms-auto">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span> 
+      </button>
+      <% if (typeof user !== 'undefined') { %>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/dashboard/list">📋 設備總覽表</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard/status">📡 設備狀態回報</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard/add">➕ 新增設備</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard/reports/add">✍️ 新增保養紀錄</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard/maintenance">🛠️ 設備保養紀錄</a>
+          </li>
+        </ul>
+        </div>
+        <% } %>
         <% if (typeof user !== 'undefined') { %>
           <a class="nav-link text-white" href="/logout">登出</a>
         <% } %>
       </div>
     </div>
   </nav>
-
   <!-- 主內容 -->
   <main class="container py-4">
     <!-- ✅ Flash 訊息區 -->

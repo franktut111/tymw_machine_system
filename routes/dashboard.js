@@ -85,14 +85,26 @@ router.get('/list', async (req, res) => {
  *               type: string
  *               example: "<html>...</html>"
  */
-router.get('/reports/add', (req, res) => {
-  const m_id = req.query.m_id || ''; // 從 URL 帶入設備編號
-  res.render('add_report', {
-    m_id,
-    success_msg: req.flash('success_msg'),
-    error_msg: req.flash('error_msg')
-  });
+router.get('/reports/add', onlyChief, async (req, res) => {
+  const m_id = req.query.m_id || '';
+
+  try {
+    // 🔍 查詢所有設備
+    const [machines] = await pool.execute('SELECT m_id, m_name FROM mach_list ORDER BY m_id');
+
+    res.render('add_report', {
+      m_id,
+      machines, // ✅ 傳給 EJS 使用 datalist
+      success_msg: req.flash('success_msg'),
+      error_msg: req.flash('error_msg')
+    });
+  } catch (err) {
+    console.error('載入新增報修頁面失敗:', err);
+    req.flash('error_msg', '無法載入設備清單');
+    res.redirect('/dashboard/list');
+  }
 });
+
 
 // ────────────── 寫入紀錄資料 ──────────────
 /**

@@ -4,13 +4,22 @@
 
     <!-- ✅ 自動帶入設備編號 -->
     <label for="m_id">設備編號</label>
-    <input type="text" name="m_id" id="m_id" class="form-control" value="<%= m_id %>" readonly>
+    <input list="m_id_list" name="m_id" id="m_id" class="form-control" value="<%= m_id || '' %>">
+    <datalist id="m_id_list">
+      <% if (machines) { %>
+        <% machines.forEach(machine => { %>
+          <option value="<%= machine.m_id %>"><%= machine.m_name %></option>
+      <% }) %>
+      <% } %>
+    </datalist>
     <span id="m_id_check" style="color:red;"></span>
 
     <label for="log_type">保養類型</label>
     <select name="log_type" id="log_type" required>
-      <option value="月保養">月保養</option>
-      <option value="年保養">年保養</option>
+      <option value="日保養" hidden></option>
+      <option value="周保養">周保養</option>
+      <option value="季保養" hidden></option>
+      <option value="年保">年保養</option>
       <option value="故障維修">故障維修</option>
     </select>
 
@@ -76,8 +85,8 @@
 
   // ✅ 檢查項目動態生成邏輯
   const checkItemsMap = {
-    '月保養': ['加潤滑油', '機械清潔'],
-    '年保養': ['加潤滑油', '機械清潔', '油壓正常', '噪音正常','床台間隙','螺桿間隙','軸承間隙'],
+    '周保養': ['加潤滑油', '機械清潔'],
+    '年保': ['加潤滑油', '機械清潔', '油壓正常', '噪音正常','床台間隙','螺桿間隙','軸承間隙'],
     '故障維修': ['指示燈', '電路正常']
   };
 

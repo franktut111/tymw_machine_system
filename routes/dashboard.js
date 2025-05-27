@@ -1,18 +1,9 @@
-/**
- * @fileoverview Dashboard routes for machine management system.
- * Handles listing, adding, editing, reporting, and status updates of machines.
- */
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const onlyChief = require('../middleware/role');
 const QRCode = require('qrcode');
 
-/**
- * Redirect root dashboard to machine list.
- * @route GET /dashboard
- */
-// Redirect 根目錄到 /dashboard/list
 router.get('/', (req, res) => {
   res.redirect('/dashboard/list');
 });
@@ -22,6 +13,8 @@ router.get('/', (req, res) => {
  * @swagger
  * /dashboard/list:
  *   get:
+ *     tags:
+ *      - 設備管理
  *     summary: 取得機台清單
  *     description: 取得所有機台的清單，包含 QR Code 資訊。
  *     responses:
@@ -69,9 +62,28 @@ router.get('/list', async (req, res) => {
 
 // ────────────── 顯示新增紀錄表單 ──────────────
 /**
- * Show add report form.
- * @route GET /dashboard/reports/add
- * @query {string} m_id - Machine ID (optional)
+ * @swagger
+ * /reports/add:
+ *   get:
+ *     tags:
+ *      - 保養維修
+ *     summary: 顯示新增報修單頁面
+ *     description: 載入新增報修單的畫面，可從 URL 參數帶入設備編號（m_id）。
+ *     parameters:
+ *       - in: query
+ *         name: m_id
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: 設備編號（可選）
+ *     responses:
+ *       200:
+ *         description: 成功載入報修單新增頁面
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *               example: "<html>...</html>"
  */
 router.get('/reports/add', (req, res) => {
   const m_id = req.query.m_id || ''; // 從 URL 帶入設備編號
@@ -84,12 +96,68 @@ router.get('/reports/add', (req, res) => {
 
 // ────────────── 寫入紀錄資料 ──────────────
 /**
- * Submit a maintenance report.
- * @route POST /dashboard/reports/add
- * @body {string} m_id - Machine ID
- * @body {string} log_type - Report type
- * @body {string} log_desc - Additional description
- * @body {Array<string>} log_flags - Selected flags
+ * @swagger
+ * /reports/add:
+ *   post:
+ *     tags:
+ *      - 保養維修
+ *     summary: 新增保養/報修紀錄
+ *     description: 提交保養或報修的表單資料，系統會驗證設備編號，並根據輸入項目產生詳細描述後寫入資料庫。
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               m_id:
+ *                 type: string
+ *                 description: 設備編號
+ *               log_type:
+ *                 type: string
+ *                 description: 紀錄類型（如保養、報修）
+ *               log_desc:
+ *                 type: string
+ *                 description: 額外說明描述
+ *               log_flags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: 選取的保養項目代碼（例如：1、2、4 等，會與 flag_status_* 搭配）
+ *               flag_status_1:
+ *                 type: string
+ *                 description: 加潤滑油的狀態（範例：正常、異常）
+ *               flag_status_2:
+ *                 type: string
+ *                 description: 機械清潔的狀態
+ *               flag_status_4:
+ *                 type: string
+ *                 description: 指示燈的狀態
+ *               flag_status_8:
+ *                 type: string
+ *                 description: 電路的狀態
+ *               flag_status_16:
+ *                 type: string
+ *                 description: 油壓的狀態
+ *               flag_status_32:
+ *                 type: string
+ *                 description: 噪音的狀態
+ *               flag_status_64:
+ *                 type: string
+ *                 description: 床台間隙的狀態
+ *               flag_status_128:
+ *                 type: string
+ *                 description: 螺桿間隙的狀態
+ *               flag_status_256:
+ *                 type: string
+ *                 description: 軸承間隙的狀態
+ *     responses:
+ *       302:
+ *         description: 表單提交後將重新導向至對應頁面
+ *       400:
+ *         description: 請求參數錯誤或格式錯誤
+ *       500:
+ *         description: 伺服器內部錯誤或新增失敗
  */
 router.post('/reports/add', async (req, res) => {
   const logFlagMap = {
@@ -144,8 +212,25 @@ router.post('/reports/add', async (req, res) => {
 
 // ────────────── 顯示保養紀錄 ──────────────
 /**
- * Display maintenance reports.
- * @route GET /dashboard/maintenance
+ * @swagger
+ * /maintenance:
+ *   get:
+ *     tags:
+ *      - 保養維修
+ *     summary: 取得保養/報修紀錄列表
+ *     description: 查詢 `mach_tlb_view` 資料視圖，回傳所有非空的保養或報修紀錄，依照紀錄時間排序。
+ *     responses:
+ *       200:
+ *         description: 成功取得保養/報修紀錄頁面
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *               example: "<html>...</html>"
+ *       302:
+ *         description: 當查詢發生錯誤時重新導向至 /dashboard，並顯示錯誤訊息
+ *       500:
+ *         description: 查詢資料時發生伺服器內部錯誤
  */
 router.get('/maintenance', async (req, res) => {
   try {
@@ -161,8 +246,25 @@ router.get('/maintenance', async (req, res) => {
 
 // ────────────── 顯示狀態更新表單 ──────────────
 /**
- * Show status update form. Requires Chief role.
- * @route GET /dashboard/status
+ * @swagger
+ * /status:
+ *   get:
+ *     tags:
+ *      - 設備管理
+ *     summary: 顯示設備狀態頁面（僅限主管）
+ *     description: 僅主管（onlyChief 中介軟體驗證通過）可存取此頁面，系統將查詢 mach_list 並依設備編號排序後顯示清單。
+ *     responses:
+ *       200:
+ *         description: 成功載入設備狀態頁面
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *               example: "<html>...</html>"
+ *       302:
+ *         description: 查詢錯誤時重新導向至 /dashboard，並顯示錯誤訊息
+ *       403:
+ *         description: 無權限存取（非主管身分）
  */
 router.get('/status',onlyChief, async (req, res) => {
   try {
@@ -177,11 +279,36 @@ router.get('/status',onlyChief, async (req, res) => {
 
 // ────────────── 提交狀態更新 ──────────────
 /**
- * Submit status update. Requires Chief role.
- * @route POST /dashboard/status
- * @body {string} m_id
- * @body {string} m_status
- * @body {string} m_pos
+ * @swagger
+ * /status:
+ *   post:
+ *     tags:
+ *      - 設備管理
+ *     summary: 新增設備狀態紀錄（僅限主管）
+ *     description: 僅主管（經 onlyChief 驗證）可提交設備狀態變更資料，資料將寫入 mach_tlb 表中。
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               m_id:
+ *                 type: string
+ *                 description: 設備編號
+ *               m_status:
+ *                 type: string
+ *                 description: 設備狀態（例如：運轉中、停機中、維修中）
+ *               m_pos:
+ *                 type: string
+ *                 description: 設備位置描述（例如:1廠)
+ *     responses:
+ *       302:
+ *         description: 提交成功或失敗後，將重新導向至 /dashboard/status 並顯示 flash 訊息
+ *       403:
+ *         description: 無權限操作（非主管身份）
+ *       500:
+ *         description: 資料庫錯誤或內部伺服器錯誤
  */
 router.post('/status', onlyChief, async (req, res) => {
   const { m_id, m_status, m_pos } = req.body;
@@ -203,8 +330,25 @@ router.post('/status', onlyChief, async (req, res) => {
 
 // ────────────── 顯示新增設備表單 ──────────────
 /**
- * Show form to add new machine. Requires Chief role.
- * @route GET /dashboard/add
+ * @swagger
+ * /add:
+ *   get:
+ *     tags:
+ *      - 設備管理
+ *     summary: 顯示新增機台頁面（僅限主管）
+ *     description: 僅主管（通過 onlyChief 驗證）可存取，頁面將載入所有部門資料供選擇。
+ *     responses:
+ *       200:
+ *         description: 成功載入新增機台頁面
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *               example: "<html>...</html>"
+ *       302:
+ *         description: 當部門資料查詢失敗時，重新導向至 /dashboard 並顯示錯誤訊息
+ *       403:
+ *         description: 無權限存取（非主管身份）
  */
 router.get('/add',onlyChief, async (req, res) => {
   try {
@@ -223,10 +367,49 @@ router.get('/add',onlyChief, async (req, res) => {
 
 // POST 新增設備
 /**
- * Submit new machine data. Requires Chief role.
- * @route POST /dashboard/add
- * @body {string} m_id, m_name, m_desc, m_status, m_pos, m_dep
+ * @swagger
+ * /add:
+ *   post:
+ *     tags:
+ *      - 設備管理
+ *     summary: 新增機台（僅限主管）
+ *     description: 僅主管（通過 onlyChief 驗證）可提交新增機台表單，資料將同時寫入 mach_list 與 mach_tlb 資料表。
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               m_id:
+ *                 type: string
+ *                 description: 設備編號（需唯一）
+ *               m_name:
+ *                 type: string
+ *                 description: 設備名稱
+ *               m_desc:
+ *                 type: string
+ *                 description: 設備描述
+ *               m_status:
+ *                 type: string
+ *                 description: 設備狀態（初始狀態，例如：正常、維修中）
+ *               m_pos:
+ *                 type: string
+ *                 description: 設備位置
+ *               m_dep:
+ *                 type: string
+ *                 description: 所屬部門代碼（dep_id）
+ *     responses:
+ *       302:
+ *         description: 新增成功或失敗後，會重新導向至對應頁面，並顯示 flash 訊息
+ *       400:
+ *         description: 設備編號已存在或輸入格式有誤
+ *       403:
+ *         description: 無權限操作（非主管身份）
+ *       500:
+ *         description: 伺服器錯誤或資料庫寫入失敗
  */
+
 router.post('/add',onlyChief, async (req, res) => {
   const { m_id, m_name, m_desc, m_status, m_pos, m_dep } = req.body;
   const log_sign = req.session.user.cn;
@@ -259,8 +442,43 @@ router.post('/add',onlyChief, async (req, res) => {
 
 // AJAX: 檢查設備編號是否存在
 /**
- * Check if machine ID exists (AJAX endpoint).
- * @route GET /dashboard/check-mid/:m_id
+ * @swagger
+ * /check-mid/{m_id}:
+ *   get:
+ *     tags:
+ *      - 設備管理
+ *     summary: 檢查設備編號是否已存在
+ *     description: 根據路由參數中的 m_id，查詢 mach_list 資料表，回傳該設備編號是否已存在。
+ *     parameters:
+ *       - in: path
+ *         name: m_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 欲檢查的設備編號
+ *     responses:
+ *       200:
+ *         description: 查詢成功，回傳設備是否存在
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 exists:
+ *                   type: boolean
+ *                   description: 是否已存在該設備編號
+ *               example:
+ *                 exists: true
+ *       500:
+ *         description: 資料庫錯誤或伺服器發生問題
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: 伺服器錯誤
  */
 router.get('/check-mid/:m_id', async (req, res) => {
   const { m_id } = req.params;
@@ -276,8 +494,34 @@ router.get('/check-mid/:m_id', async (req, res) => {
 // ────────────── 顯示設備編輯表單 ──────────────
 // routes/dashboard.js
 /**
- * Show edit machine form. Requires Chief role.
- * @route GET /dashboard/edit/:m_id
+ * @swagger
+ * /edit/{m_id}:
+ *   get:
+ *     tags:
+ *      - 設備管理
+ *     summary: 顯示編輯機台頁面（僅限主管）
+ *     description: 僅主管（通過 onlyChief 中介層驗證）可存取此路由。根據設備編號查詢設備資料與部門清單，用於編輯畫面呈現。
+ *     parameters:
+ *       - in: path
+ *         name: m_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 要編輯的設備編號
+ *     responses:
+ *       200:
+ *         description: 成功載入編輯頁面，並顯示設備與部門資料
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *               example: "<html>...</html>"
+ *       302:
+ *         description: 查無資料或發生錯誤時導向 /dashboard/list，並顯示錯誤訊息
+ *       403:
+ *         description: 無權限存取（非主管身分）
+ *       500:
+ *         description: 資料庫錯誤或伺服器內部錯誤
  */
 router.get('/edit/:m_id',onlyChief, async (req, res) => {
   const m_id = req.params.m_id;
@@ -307,10 +551,47 @@ router.get('/edit/:m_id',onlyChief, async (req, res) => {
 
 // ────────────── 提交編輯設備 ──────────────
 /**
- * Submit edit machine form. Requires Chief role.
- * @route POST /dashboard/edit/:m_id
- * @body {string} m_name, m_desc, m_dep
+ * @swagger
+ * /edit/{m_id}:
+ *   post:
+ *     tags:
+ *      - 設備管理
+ *     summary: 更新機台資料（僅限主管）
+ *     description: 僅主管（通過 onlyChief 驗證）可編輯指定設備資料，根據設備編號更新名稱、描述與部門。
+ *     parameters:
+ *       - in: path
+ *         name: m_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 要更新的設備編號
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               m_name:
+ *                 type: string
+ *                 description: 新的設備名稱
+ *               m_desc:
+ *                 type: string
+ *                 description: 新的設備描述
+ *               m_dep:
+ *                 type: string
+ *                 description: 所屬部門代碼
+ *     responses:
+ *       302:
+ *         description: 更新成功或失敗後，重新導向 /dashboard/list 並顯示 flash 訊息
+ *       400:
+ *         description: 更新失敗，設備不存在
+ *       403:
+ *         description: 無權限操作（非主管身分）
+ *       500:
+ *         description: 資料庫錯誤或伺服器發生錯誤
  */
+
 router.post('/edit/:m_id',onlyChief, async (req, res) => {
   const m_id = req.params.m_id;
   const { m_name, m_desc,m_dep } = req.body;

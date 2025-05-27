@@ -1,29 +1,59 @@
-/**
- * @module routes/auth
- * @description Handles user authentication with LDAP
- */
 const ldap = require('ldapjs');
 const { authenticate } = require('ldap-authentication');
 const express = require('express');
 const router = express.Router();
 
 /**
- * GET /login
- * @description Render the login page.
- * @route GET /login
+ * @swagger
+ * /login:
+ *   get:
+ *     tags:
+ *       - 使用者登入
+ *     summary: 顯示登入頁面
+ *     description: 顯示使用者輸入帳號與密碼的登入畫面。
+ *     responses:
+ *       200:
+ *         description: 成功載入登入畫面
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
  */
+
 router.get('/login', (req, res) => {
   res.render('login'); // 顯示登入畫面
 });
 
 /**
- * POST /login
- * @description Handle LDAP login and session creation.
- * @route POST /login
- * @param {string} username - The user's LDAP username (from form)
- * @param {string} password - The user's LDAP password (from form)
- * @returns {302} Redirects to the homepage on success or login page on failure
+ * @swagger
+ * /login:
+ *   post:
+ *     tags:
+ *       - 使用者登入
+ *     summary: 使用 LDAP 驗證進行登入
+ *     description: 使用者輸入帳號密碼後，透過 LDAP 驗證並建立 session，同時檢查是否為主管（chief 群組）。
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: 使用者帳號
+ *               password:
+ *                 type: string
+ *                 description: 使用者密碼
+ *     responses:
+ *       302:
+ *         description: 登入成功或失敗後導向頁面，並顯示 flash 訊息
+ *       401:
+ *         description: 認證失敗（帳號或密碼錯誤）
+ *       500:
+ *         description: LDAP 伺服器錯誤
  */
+
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   const options = {
@@ -97,10 +127,18 @@ router.post('/login', async (req, res) => {
 });
 
 /**
- * GET /logout
- * @description Destroys the session and redirects to login.
- * @route GET /logout
+ * @swagger
+ * /logout:
+ *   get:
+ *     tags:
+ *       - 使用者登入
+ *     summary: 使用者登出
+ *     description: 清除 session 並重新導向至登入頁面。
+ *     responses:
+ *       302:
+ *         description: 登出成功，重新導向至 /login
  */
+
 router.get('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/login');

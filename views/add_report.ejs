@@ -9,10 +9,8 @@
 
     <label for="log_type">保養類型</label>
     <select name="log_type" id="log_type" required>
-      <option value="日保養">日保養</option>
-      <option value="周保養">周保養</option>
-      <option value="季保養">季保養</option>
-      <option value="年保">年保</option>
+      <option value="月保養">月保養</option>
+      <option value="年保養">年保養</option>
       <option value="故障維修">故障維修</option>
     </select>
 
@@ -78,11 +76,9 @@
 
   // ✅ 檢查項目動態生成邏輯
   const checkItemsMap = {
-    '日保養': ['加潤滑油', '機械清潔', '指示燈'],
-    '周保養': ['加潤滑油', '機械清潔', '電路正常', '指示燈'],
-    '季保養': ['加潤滑油', '機械清潔', '指示燈', '油壓正常', '噪音正常'],
-    '年保': ['加潤滑油', '機械清潔', '指示燈', '油壓正常', '噪音正常', '床台間隙', '螺桿間隙', '軸承間隙'],
-    '故障維修': ['電路正常', '油壓正常', '噪音正常']
+    '月保養': ['加潤滑油', '機械清潔'],
+    '年保養': ['加潤滑油', '機械清潔', '油壓正常', '噪音正常','床台間隙','螺桿間隙','軸承間隙'],
+    '故障維修': ['指示燈', '電路正常']
   };
 
   const itemValueMap = {

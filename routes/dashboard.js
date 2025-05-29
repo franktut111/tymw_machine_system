@@ -85,7 +85,7 @@ router.get('/list', async (req, res) => {
  *               type: string
  *               example: "<html>...</html>"
  */
-router.get('/reports/add', onlyChief, async (req, res) => {
+router.get('/reports/add', async (req, res) => {
   const m_id = req.query.m_id || '';
 
   try {

@@ -10,8 +10,8 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:5002',
-        description: '本地開發伺服器',
+        url: 'frank.tsungyin.tw:5002',
+        description: '設備/保養維修管理系統',
       },
     ],
   },

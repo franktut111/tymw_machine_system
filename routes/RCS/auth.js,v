@@ -1,10 +1,39 @@
-const ldap = require('ldapjs');
+head	1.2;
+access;
+symbols;
+locks
+	root:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2025.09.08.01.51.15;	author root;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2025.09.05.05.24.43;	author root;	state Exp;
+branches;
+next	;
+
+
+desc
+@tialization
+@
+
+
+1.2
+log
+@change LDAP to frank.tsungyin.tw and tek ldap dn=groups change to frank ldap dn=group
+@
+text
+@const ldap = require('ldapjs');
 const { authenticate } = require('ldap-authentication');
 const express = require('express');
 const router = express.Router();
 
 /**
- * @swagger
+ * @@swagger
  * /login:
  *   get:
  *     tags:
@@ -25,7 +54,7 @@ router.get('/login', (req, res) => {
 });
 
 /**
- * @swagger
+ * @@swagger
  * /login:
  *   post:
  *     tags:
@@ -127,7 +156,7 @@ router.post('/login', async (req, res) => {
 });
 
 /**
- * @swagger
+ * @@swagger
  * /logout:
  *   get:
  *     tags:
@@ -146,3 +175,21 @@ router.get('/logout', (req, res) => {
 });
 
 module.exports = router;
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d61 1
+a61 1
+      url: 'ldap://tek.tsungyin.tw',
+d80 1
+a80 1
+    const client = ldap.createClient({ url: 'ldap://tek.tsungyin.tw' });
+d96 1
+a96 1
+      client.search('ou=groups,dc=tsungyin,dc=tw', opts, (err, res) => {
+@

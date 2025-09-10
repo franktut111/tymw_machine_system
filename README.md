@@ -6,6 +6,6 @@
       - test
 ## 設備管理(/dashboard)
 `test`
-```
+```C++
 System.out.println("Hello");
 ```

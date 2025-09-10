@@ -6,6 +6,6 @@
       - test
 ## 設備管理(/dashboard)
 `test`
-```C++
+```PYTHON
 System.out.println("Hello");
 ```

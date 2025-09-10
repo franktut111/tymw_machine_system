@@ -6,3 +6,6 @@
       - test
 ## 設備管理(/dashboard)
 `test`
+```JAVA
+System.out.println("Hello");
+```
